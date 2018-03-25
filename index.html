@@ -1,0 +1,258 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Codificación</title>
+
+</head>
+
+<body>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body,
+        html,
+        .container {
+            height: 100%;
+            width: 100%;
+        }
+
+        table {
+            border-collapse: collapse;
+            height: 300px;
+        }
+
+        table td:nth-child(1) {
+            border-right: solid;
+            font-weight: bold;
+        }
+
+        table td:nth-child(1n+2) {
+            /*border-left: solid;*/
+            /*border-top: solid;*/
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        table tr:nth-child(1) td:nth-child(1n+2) {
+            border-bottom: solid;
+        }
+
+        table tr td:nth-child(1n+2) {
+            border-right: 1px dashed;
+        }
+
+        .border-top {
+            border-top: solid red !important;
+        }
+
+        .border-right {
+            border-right: solid red !important;
+        }
+
+        .border-left {
+            border-left: solid red !important;
+        }
+
+        .border-bottom {
+            border-bottom: solid red !important;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            /*align-items: center;*/
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            reset();
+            find("#calcular").onclick = function () {
+                reset();
+                var secuence = find("#txtSecuence").value;
+                applyRule(secuence.split(""), find("#drpTpRule").options[find("#drpTpRule").selectedIndex].value)
+            }
+            find("#txtSecuence").onkeyup = function (a, b) {
+
+                find("#calcular").click();
+            }
+            find("#txtSecuence").onkeypress = function (a, b) {
+                //console.log(a);
+                return ((a.key == 0) || (a.key == 1) || (a.keyCode==46)|| (a.keyCode==8)|| (a.keyCode >= 37 && a.keyCode <= 40) ) ? true : false ;
+            }
+            find("#drpTpRule").onchange = function () {
+                find("#calcular").click();
+            }
+        }
+        function applyRule(sec, tpRule) {
+            var a = {};
+            switch (tpRule) {
+                case "NRZ":
+                    var ant = 0;
+                    var sig = 0;
+                    console.log(sec);
+                    for (f in sec) {
+                        if (sec[f] == 0) {
+                            sig = -1;
+                        } else if (sec[f] == 1) {
+                            sig = 1;
+                        }
+                        draw(ant, sig, sec[f]);
+                        ant = sig;
+                    }
+                    break;
+                case "AMI":
+                    var ant = 0;
+                    var sig = 0;
+                    var estadoAnt = -1;
+                    for (f in sec) {
+                        if (sec[f] == 0) {
+                            sig = 0;
+                        } else if ((sec[f] == 1) && (estadoAnt == -1)) {
+                            sig = 1;
+                            estadoAnt = 1;
+                        } else if ((sec[f] == 1) && (estadoAnt == 1)) {
+                            sig = -1;
+                            estadoAnt = -1;
+                        } else {
+                            sig = 1;
+                        }
+
+                        // if (sec[f] == 1) {
+                        draw(ant, sig, sec[f]);
+                        ant = sig;
+                        // } else {
+                        //     draw(0, sig, sec[f]);
+                        // }
+                        //console.log(sec[f] + ":" + ant + "," + sig)
+                    }
+                    break;
+            }
+            // draw(a);
+        }
+
+        function draw(ant, sig, text) {
+            var positive = find("#resu tr:nth-child(1)");
+            var negative = find("#resu tr:nth-child(2)");
+            var td = document.createElement("td");
+            // var igualAnt = false
+            // if (ant == sig) {
+            //     igualAnt = true;
+            // }
+            // if (sig = 1) {
+            if ((ant == sig) && ant == 1) {
+                td.classList.add("border-top");
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                negative.appendChild(td);
+            } else if ((ant == sig) && ant == -1) {
+                td = document.createElement("td");
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                td.classList.add("border-bottom");
+                negative.appendChild(td);
+            } else if ((ant == sig) && ant == 0) {
+                td = document.createElement("td");
+                td.innerText = text;
+                td.classList.add("border-bottom");
+                positive.appendChild(td);
+                td = document.createElement("td");
+                negative.appendChild(td);
+            } else if ((ant == -1) && (sig == 1)) {
+                td.classList.add("border-left");
+                td.classList.add("border-top")
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                td.classList.add("border-left");
+                negative.appendChild(td);
+            } else if ((ant == 0) && (sig == 1)) {
+                td.classList.add("border-left");
+                td.classList.add("border-top")
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                // td.classList.add("border-left");
+                negative.appendChild(td);
+            } else if ((ant == 0) && (sig == -1)) {
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                td.classList.add("border-left");
+                td.classList.add("border-bottom");
+                negative.appendChild(td);
+            } else if ((ant == 1) && (sig == -1)) {
+                td.classList.add("border-left");
+                td.innerText = text;
+                positive.appendChild(td);
+                td = document.createElement("td");
+                td.classList.add("border-left");
+                td.classList.add("border-bottom");
+                negative.appendChild(td);
+            } else if (ant == -1 && sig == 0) {
+                td.innerText = text;
+                td.classList.add("border-bottom");
+                positive.appendChild(td);
+                td = document.createElement("td");
+                td.classList.add("border-left");
+                negative.appendChild(td);
+            } else if (ant == 1 && sig == 0) {
+                td.innerText = text;
+                td.classList.add("border-left");
+                td.classList.add("border-bottom");
+                positive.appendChild(td);
+                td = document.createElement("td");
+
+                negative.appendChild(td);
+            }
+
+
+            // document.getElementById().appendChild
+            // }else if(sig=0){
+            //     td.classList.add("border-top");
+            // }
+
+            //console.log(a);
+        }
+        function find(a) {
+            return document.querySelector(a);
+        }
+        function reset() {
+            find("#resu").innerHTML = "<tr> <td>+</td></tr><tr><td>-</td></tr>";
+        }
+    </script>
+    <div class="container">
+        <div>
+            <div>
+                <h2>Codificación</h2>
+                <label for="txtSecuence">
+                    Ingrese La secuencia Binaria
+                </label>
+                <input type="text" id="txtSecuence"  /><!--value="11011000100"-->
+                <select id="drpTpRule">
+                    <option value="AMI" selected>AMI</option>
+                    <option value="NRZ">No retorna a cero(NRZ)</option>
+                </select>
+                <button id="calcular">calcular</button>
+
+                <br/>
+            </div>
+            <div>
+                <br/>
+                <table id="resu">
+
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
